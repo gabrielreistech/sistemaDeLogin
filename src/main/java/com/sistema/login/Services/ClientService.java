@@ -1,12 +1,12 @@
-package com.desafio.pitang.Services;
+package com.sistema.login.Services;
 
-import com.desafio.pitang.Dtos.ClientDto;
-import com.desafio.pitang.Dtos.ClientLoginDto;
-import com.desafio.pitang.Dtos.ClientMeDto;
-import com.desafio.pitang.Models.Client;
-import com.desafio.pitang.Repositorys.ClientRepository;
-import com.desafio.pitang.Security.JwtUtil;
-import com.desafio.pitang.Validation.ValidationUser;
+import com.sistema.login.Dtos.ClientDto;
+import com.sistema.login.Dtos.ClientLoginDto;
+import com.sistema.login.Dtos.ClientMeDto;
+import com.sistema.login.Models.Client;
+import com.sistema.login.Repositorys.ClientRepository;
+import com.sistema.login.Security.JwtUtil;
+import com.sistema.login.Validation.ValidationUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,12 +52,6 @@ public class ClientService {
     public ClientMeDto findByEmail(String userName){
        Client client = this.clientRepository.findByEmail(userName).orElseThrow(() -> new IllegalArgumentException("User not Found"));
        return new ClientMeDto(client);
-    }
-
-    public Page<ClientDto> findAll(int page, int size, String sort){
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
-        Page<Client> pageResponse = this.clientRepository.findAll(pageable);
-        return pageResponse.map(ClientDto::new);
     }
 
     public String login(ClientLoginDto clientLoginDto){

@@ -1,7 +1,7 @@
-package com.desafio.pitang.Dtos;
+package com.sistema.login.Dtos;
 
 
-import com.desafio.pitang.Models.Phone;
+import com.sistema.login.Models.Phone;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

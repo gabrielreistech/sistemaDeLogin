@@ -1,9 +1,9 @@
-package com.desafio.pitang.Controllers;
+package com.sistema.login.Controllers;
 
-import com.desafio.pitang.Dtos.ClientDto;
-import com.desafio.pitang.Dtos.ClientMeDto;
-import com.desafio.pitang.Security.JwtUtil;
-import com.desafio.pitang.Services.ClientService;
+import com.sistema.login.Dtos.ClientDto;
+import com.sistema.login.Dtos.ClientMeDto;
+import com.sistema.login.Security.JwtUtil;
+import com.sistema.login.Services.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +25,6 @@ public class PrivateController {
     @Autowired
     JwtUtil jwtUtil;
 
-    @GetMapping("/clients")
-    public ResponseEntity<Page<ClientDto>> findAll(
-           @RequestParam(defaultValue = "0") @Min(0) int page,
-           @RequestParam(defaultValue = "10") @Min(1) int size,
-           @RequestParam(defaultValue = "firstName") String sort
-    ){
-       Page<ClientDto> pageResponse = this.clientService.findAll(page, size, sort);
-          return ResponseEntity.ok(pageResponse);
-    }
 
     @GetMapping("/me")
     public ResponseEntity<?> getUserDetails(HttpServletRequest request) {
@@ -50,8 +41,10 @@ public class PrivateController {
         try {
             username = jwtUtil.extractUsername(token);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized - invalid session");
+            System.out.println("Erro ao extrair o nome de usuário: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
+
 
         // Recuperar os detalhes do usuário
         ClientMeDto user = clientService.findByEmail(username);

@@ -1,4 +1,4 @@
-package com.desafio.pitang.Models;
+package com.sistema.login.Models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;

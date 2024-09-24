@@ -1,4 +1,4 @@
-package com.desafio.pitang.Exception;
+package com.sistema.login.Exception;
 
 public class EmailExistingException extends IllegalArgumentException{
 

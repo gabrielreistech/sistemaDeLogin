@@ -1,6 +1,6 @@
-package com.desafio.pitang.Dtos;
+package com.sistema.login.Dtos;
 
-import com.desafio.pitang.Models.Client;
+import com.sistema.login.Models.Client;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 

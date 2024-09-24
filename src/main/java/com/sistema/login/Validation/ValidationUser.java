@@ -1,10 +1,10 @@
-package com.desafio.pitang.Validation;
+package com.sistema.login.Validation;
 
-import com.desafio.pitang.Dtos.ClientDto;
-import com.desafio.pitang.Dtos.ClientLoginDto;
-import com.desafio.pitang.Exception.EmailExistingException;
-import com.desafio.pitang.Models.Client;
-import com.desafio.pitang.Repositorys.ClientRepository;
+import com.sistema.login.Dtos.ClientDto;
+import com.sistema.login.Dtos.ClientLoginDto;
+import com.sistema.login.Exception.EmailExistingException;
+import com.sistema.login.Models.Client;
+import com.sistema.login.Repositorys.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

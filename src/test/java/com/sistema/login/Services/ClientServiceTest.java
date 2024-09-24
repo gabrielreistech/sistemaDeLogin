@@ -1,14 +1,14 @@
-package com.desafio.pitang.Services;
+package com.sistema.login.Services;
 
-import com.desafio.pitang.Dtos.ClientDto;
-import com.desafio.pitang.Dtos.ClientLoginDto;
-import com.desafio.pitang.Dtos.ClientMeDto;
-import com.desafio.pitang.Exception.EmailExistingException;
-import com.desafio.pitang.Models.Client;
-import com.desafio.pitang.Models.Phone;
-import com.desafio.pitang.Repositorys.ClientRepository;
-import com.desafio.pitang.Security.JwtUtil;
-import com.desafio.pitang.Validation.ValidationUser;
+import com.sistema.login.Dtos.ClientDto;
+import com.sistema.login.Dtos.ClientLoginDto;
+import com.sistema.login.Dtos.ClientMeDto;
+import com.sistema.login.Exception.EmailExistingException;
+import com.sistema.login.Models.Client;
+import com.sistema.login.Models.Phone;
+import com.sistema.login.Repositorys.ClientRepository;
+import com.sistema.login.Security.JwtUtil;
+import com.sistema.login.Validation.ValidationUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,33 +109,6 @@ class ClientServiceTest {
 
         assertNotNull(clientMeDto);
         assertEquals("gabrielteste@gmail.com", clientMeDto.getEmail());
-    }
-
-    @Test
-    void findAll() {
-        Client client1 = new Client();
-        client1.setId(1L);
-        client1.setFirstName("Gabriel");
-        client1.setLastName("Antunes");
-
-        Client client2 = new Client();
-        client2.setId(2L);
-        client2.setFirstName("John");
-        client2.setLastName("Doe");
-
-        List<Client> clients = Arrays.asList(client1, client2);
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("firstName"));
-
-        Page<Client> pageResponse = new PageImpl<>(clients, pageable, clients.size());
-        when(clientRepository.findAll(pageable)).thenReturn(pageResponse);
-
-        Page<ClientDto> result = clientService.findAll(0, 10, "firstName");
-
-        assertEquals(2, result.getContent().size());
-        assertEquals(1L, result.getContent().get(0).getId());
-        assertEquals("Gabriel", result.getContent().get(0).getFirstName());
-        assertEquals(2L, result.getContent().get(1).getId());
-        assertEquals("John", result.getContent().get(1).getFirstName());
     }
 
     @Test

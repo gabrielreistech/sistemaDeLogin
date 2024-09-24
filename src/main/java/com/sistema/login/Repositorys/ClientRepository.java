@@ -1,6 +1,6 @@
-package com.desafio.pitang.Repositorys;
+package com.sistema.login.Repositorys;
 
-import com.desafio.pitang.Models.Client;
+import com.sistema.login.Models.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,8 @@
-package com.desafio.pitang.Security;
+package com.sistema.login.Security;
 
 
-import com.desafio.pitang.Models.Client;
-import com.desafio.pitang.Repositorys.ClientRepository;
+import com.sistema.login.Models.Client;
+import com.sistema.login.Repositorys.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

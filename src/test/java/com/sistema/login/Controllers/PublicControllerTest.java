@@ -1,9 +1,9 @@
-package com.desafio.pitang.Controllers;
+package com.sistema.login.Controllers;
 
-import com.desafio.pitang.Dtos.ClientDto;
-import com.desafio.pitang.Dtos.ClientLoginDto;
-import com.desafio.pitang.Models.Phone;
-import com.desafio.pitang.Services.ClientService;
+import com.sistema.login.Dtos.ClientDto;
+import com.sistema.login.Dtos.ClientLoginDto;
+import com.sistema.login.Models.Phone;
+import com.sistema.login.Services.ClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

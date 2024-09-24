@@ -1,4 +1,4 @@
-package com.desafio.pitang.Exception;
+package com.sistema.login.Exception;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,13 @@ class StandardErrorTest {
     }
 
     @Test
-    void Construct(){
+    void ConstructComplet(){
+        StandardError errorTeste = new StandardError(Instant.now(), 404, "Error", "Message Error", "/Error");
+        assertEquals(404, errorTeste.getStatus());
+    }
+
+    @Test
+    void ConstructEmpty(){
         Instant timeNow = Instant.now();
         error.setTimestamp(timeNow);
 

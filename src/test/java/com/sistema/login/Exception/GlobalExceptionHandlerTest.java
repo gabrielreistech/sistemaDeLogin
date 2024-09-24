@@ -1,4 +1,4 @@
-package com.desafio.pitang.Exception;
+package com.sistema.login.Exception;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import org.mockito.Mockito;
