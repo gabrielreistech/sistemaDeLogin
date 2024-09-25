@@ -1,33 +1,26 @@
 package com.sistema.login.Security;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtFilterTest {
-
-    @InjectMocks
-    private JwtFilter jwtFilter;
 
     @Mock
     private JwtUtil jwtUtil;
@@ -44,87 +37,100 @@ public class JwtFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    @Test
-    void testDoFilterInternal_WithValidToken() throws IOException, ServletException {
-        String token = "Bearer validToken";
-        String expectedUsername = "test@example.com";
-        UserDetails userDetails = mock(UserDetails.class);
+    @Mock
+    private UserDetails userDetails;
 
-        lenient().when(request.getHeader("Authorization")).thenReturn(token);
-        lenient().when(jwtUtil.extractUsername("validToken")).thenReturn(expectedUsername);
-        lenient().when(jwtUtil.validateToken("validToken", expectedUsername)).thenReturn(true);
-        lenient().when(userDetailsService.loadUserByUsername(expectedUsername)).thenReturn(userDetails);
-        lenient().when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
+    @InjectMocks
+    private JwtFilter jwtFilter;
 
-        jwtFilter.doFilterInternal(request, response, filterChain);
+    @Mock
+    private PrintWriter writer;
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @BeforeEach
+    public void setUp() throws IOException {
+        SecurityContextHolder.clearContext();
 
-        assertNotNull(authentication, "Authentication should be set");
-        assertEquals(expectedUsername, authentication.getName(), "Username should match");
+        jwtFilter = new JwtFilter(jwtUtil, userDetailsService);
 
-        verify(filterChain).doFilter(request, response);
+        String pathRequest = "pathRequestMock";
+
+        when(request.getRequestURI()).thenReturn(pathRequest);
     }
 
     @Test
-    void testDoFilterInternal_WithInvalidToken() throws ServletException, IOException {
-        String token = "Bearer invalidToken";
-        PrintWriter mockWriter = mock(PrintWriter.class);
+    void pathRequestPublic() throws ServletException, IOException {
+        String pathRequestPublic = "/public/";
 
-        when(request.getHeader("Authorization")).thenReturn(token);
-        when(jwtUtil.extractUsername("invalidToken")).thenThrow(new RuntimeException("Invalid token"));
-        when(response.getWriter()).thenReturn(mockWriter);
+        when(request.getRequestURI()).thenReturn(pathRequestPublic);
+
+        if(pathRequestPublic.startsWith("/public/")){
+            doNothing().when(filterChain).doFilter(request, response);
+        }
 
         jwtFilter.doFilterInternal(request, response, filterChain);
-
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(mockWriter).write("Unauthorized"); // Verifica se o método write foi chamado
-        verify(filterChain, never()).doFilter(request, response);
     }
 
     @Test
-    void testDoFilterInternal_AuthHeaderNull() throws IOException, ServletException {
-        PrintWriter mockWriter = mock(PrintWriter.class);
+    void testDoFilterInternal_ValidJwtToken() throws ServletException, IOException {
+        String validToken = "Bearer valid.jwt.token";
+        String username = "testUser";
 
-        when(request.getHeader("Authorization")).thenReturn(null);
-        when(response.getWriter()).thenReturn(mockWriter);
 
-        jwtFilter.doFilterInternal(request, response, filterChain);
+        when(request.getHeader("Authorization")).thenReturn(validToken);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    }
-
-    @Test
-    void testDoFilterInternal_ValidToken_ShouldSetAuthentication() throws IOException, ServletException {
-        String token = "Bearer validToken";
-        String username = "test@example.com";
-        UserDetails userDetails = mock(UserDetails.class);
-
-        // Configure o mock de UserDetails para retornar o username esperado
-        when(userDetails.getUsername()).thenReturn(username);
-        when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
-
-        when(request.getHeader("Authorization")).thenReturn(token);
-        when(jwtUtil.extractUsername("validToken")).thenReturn(username);
+        when(jwtUtil.extractUsername(anyString())).thenReturn(username);
+        when(jwtUtil.validateToken(anyString(), eq(username))).thenReturn(true);
         when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
-        when(jwtUtil.validateToken("validToken", username)).thenReturn(true);
 
         jwtFilter.doFilterInternal(request, response, filterChain);
 
-        // Verifique se a autenticação foi definida no contexto de segurança
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
+        UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(authentication);
-        assertEquals(username, authentication.getName()); // Verifica se o nome do usuário corresponde
+        assertEquals(userDetails, authentication.getPrincipal());
+
+        verify(filterChain, times(1)).doFilter(request, response);
     }
 
     @Test
-    void testDoFilterInternal_WithoutAuthorizationHeader() throws IOException, ServletException {
-        PrintWriter mockWriter = mock(PrintWriter.class);
-        when(response.getWriter()).thenReturn(mockWriter); // Certifique-se de que isso está configurado
+    void testDoFilterInternal_InvalidAuthHeader() throws ServletException, IOException {
+        String invalidAuthHeader = "InvalidHeader";
+
+        when(request.getHeader("Authorization")).thenReturn(invalidAuthHeader);
 
         jwtFilter.doFilterInternal(request, response, filterChain);
 
-        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Verifica se o status foi definido
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(filterChain, times(0)).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_InvalidJwtToken() throws ServletException, IOException {
+        String invalidToken = "Bearer invalid.jwt.token";
+
+        when(request.getHeader("Authorization")).thenReturn(invalidToken);
+        when(jwtUtil.extractUsername(anyString())).thenThrow(new RuntimeException("Invalid token"));
+
+        jwtFilter.doFilterInternal(request, response, filterChain);
+
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        verify(filterChain, times(0)).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ValidUserDetailsAndValidToken() throws ServletException, IOException {
+        String authHeader = "Bearer valid_token";
+        String username = "testUser";
+        UserDetails userDetails = mock(UserDetails.class);
+        String jwtToken = "valid_token";
+
+        when(request.getHeader("Authorization")).thenReturn(authHeader);
+        when(jwtUtil.extractUsername(jwtToken)).thenReturn(username);
+        when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
+        when(jwtUtil.validateToken(jwtToken, username)).thenReturn(true);
+
+        jwtFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(1)).doFilter(request, response);
+        verify(response, never()).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }

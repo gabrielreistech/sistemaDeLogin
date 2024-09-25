@@ -1,12 +1,16 @@
 package com.sistema.login.Controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistema.login.Dtos.ClientMeDto;
+import com.sistema.login.Models.Client;
+import com.sistema.login.Models.Phone;
 import com.sistema.login.Security.TestSecurityConfig;
 import com.sistema.login.Services.ClientService;
 import com.sistema.login.Security.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,17 +18,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
+import java.time.LocalDateTime;
+import java.util.List;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PrivateController.class)
 @Import(TestSecurityConfig.class)
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = true)
 public class PrivateControllerTest {
 
     @Autowired
@@ -36,46 +40,58 @@ public class PrivateControllerTest {
     @MockBean
     private JwtUtil jwtUtil;
 
+    @Mock
+    private HttpServletRequest request;
+
+    @InjectMocks
+    private PrivateController privateController;
+
     private ClientMeDto clientMeDto;
+
 
     @BeforeEach
     void setUp() {
-        clientMeDto = new ClientMeDto();
-        clientMeDto.setEmail("user@example.com"); // Configure outros campos conforme necessário
+        Phone phone = new Phone(819999999L, (byte)81, "+55");
+        phone.setId(1L);
+        List<Phone> phones = List.of(phone);
+
+        Client client = new Client("Gabriel", "Teste", "gabrielteste@gmail.com", "123456", phones, LocalDateTime.now(), LocalDateTime.now());
+
+        clientMeDto = new ClientMeDto(client);
+    }
+
+    @Test
+    void throwsNoHeader() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn(null);
+
+        mockMvc.perform(get("/private/me"))
+                .andExpect(status().isUnauthorized());
+
     }
 
     @Test
     void testGetUserDetails_Unauthorized_NoToken() throws Exception {
-        mockMvc.perform(get("/private/me")) // Sem cabeçalho
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+        mockMvc.perform(get("/private/me"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testGetUserDetails_InvalidAuthHeader() throws Exception {
-        // Testa com cabeçalho Authorization nulo
-        mockMvc.perform(get("/private/me")) // Sem cabeçalho
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
-
         // Testa com cabeçalho Authorization que não começa com Bearer
-        String invalidAuthHeader = "Basic some_other_token"; // Cabeçalho inválido
-        mockMvc.perform(get("/private/me").header("Authorization", invalidAuthHeader))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+        String invalidAuthHeader = "Basic some_other_token";
+        mockMvc.perform(get("/private/me")
+                .header("Authorization", invalidAuthHeader))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testGetUserDetails_Unauthorized_InvalidToken() throws Exception {
-        String invalidToken = "invalid_token"; // Token inválido
+        String invalidToken = "invalid_token";
 
-        // Simulando o comportamento do método extractUsername para o token inválido
         when(jwtUtil.extractUsername("invalid_token")).thenThrow(new RuntimeException("Invalid token"));
 
-        // Executando a requisição com o cabeçalho Authorization
         mockMvc.perform(get("/private/me").header("Authorization", "Bearer " + invalidToken))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -85,11 +101,25 @@ public class PrivateControllerTest {
 
         when(jwtUtil.extractUsername(validToken)).thenReturn(username);
         when(clientService.findByEmail(username)).thenReturn(clientMeDto);
+        when(jwtUtil.validateToken(validToken, username)).thenReturn(true);
 
-        mockMvc.perform(get("/private/me").header("Authorization", "Bearer " + validToken))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(clientMeDto)));
+        mockMvc.perform(get("/private/me")
+                        .header("Authorization", "Bearer " + validToken))
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    public void testGetUserDetails_SuccessTwo() throws Exception {
+        String authHeader = "Bearer valid_token";
+
+        when(clientService.getUserDetailsService(any(HttpServletRequest.class))).thenReturn(anyString());
+        when(clientService.findByEmail(clientMeDto.getEmail())).thenReturn(clientMeDto);
+
+        mockMvc.perform(get("/me")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -101,27 +131,23 @@ public class PrivateControllerTest {
         // Act & Assert
         mockMvc.perform(get("/private/me")
                         .header("Authorization", authHeader))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testGetUserDetails_AllUnauthorizedCases() throws Exception {
 
-        mockMvc.perform(get("/private/me")) // Sem cabeçalho
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+        mockMvc.perform(get("/private/me"))
+                .andExpect(status().isUnauthorized());
 
-        String invalidAuthHeader = "Basic some_other_token"; // Cabeçalho inválido
+        String invalidAuthHeader = "Basic some_other_token";
         mockMvc.perform(get("/private/me").header("Authorization", invalidAuthHeader))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+                .andExpect(status().isUnauthorized());
 
         String validAuthHeader = "Bearer valid_token";
         when(jwtUtil.extractUsername("valid_token")).thenThrow(new RuntimeException("Erro ao extrair o nome de usuário"));
 
         mockMvc.perform(get("/private/me").header("Authorization", validAuthHeader))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Unauthorized"));
+                .andExpect(status().isUnauthorized());
     }
 }

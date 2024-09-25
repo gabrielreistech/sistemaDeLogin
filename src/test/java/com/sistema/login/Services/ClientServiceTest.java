@@ -9,17 +9,15 @@ import com.sistema.login.Models.Phone;
 import com.sistema.login.Repositorys.ClientRepository;
 import com.sistema.login.Security.JwtUtil;
 import com.sistema.login.Validation.ValidationUser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,6 +40,9 @@ class ClientServiceTest {
 
     @InjectMocks
     ClientService clientService;
+
+    @Mock
+    HttpServletRequest request;
 
     private Client client;
 
@@ -163,5 +164,62 @@ class ClientServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> clientService.findByEmail(userName));
 
         assertEquals("User not Found", exception.getMessage());
+    }
+
+    @Test
+    void getUserDetailsService() {
+         String authHeaderMock = "Bearer mock";
+         String tokenMock = "mock";
+         String userNameMock = "userNameMock";
+
+         when(request.getHeader("Authorization")).thenReturn(authHeaderMock);
+         when(jwtUtil.extractUsername(tokenMock)).thenReturn(userNameMock);
+
+         String username = clientService.getUserDetailsService(request);
+
+         assertEquals(username, userNameMock);
+
+         verify(request, times(1)).getHeader("Authorization");
+
+    }
+
+    @Test
+    void getUserDetailsServiceException(){
+        String authHeaderMock = null;
+        when(request.getHeader("Authorization")).thenReturn(authHeaderMock);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> clientService.getUserDetailsService(request));
+
+        assertEquals("Unauthorized", exception.getMessage());
+    }
+
+    @Test
+    void getUserDetailsServiceExceptionTwo(){
+        String authHeaderMock = "SemBearer";
+        when(request.getHeader("Authorization")).thenReturn(authHeaderMock);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> clientService.getUserDetailsService(request));
+
+        assertEquals("Unauthorized", exception.getMessage());
+    }
+
+    @Test
+    void getUserDetailsService_ThrowsException() {
+        String authHeaderMock = "Bearer mockToken";
+        String tokenMock = "mockToken";
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader("Authorization")).thenReturn(authHeaderMock);
+
+        when(jwtUtil.extractUsername(tokenMock)).thenThrow(new RuntimeException("Token inválido"));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            clientService.getUserDetailsService(request);
+        });
+
+        assertEquals("Unauthorized", exception.getMessage());
+        verify(request, times(1)).getHeader("Authorization");
     }
 }

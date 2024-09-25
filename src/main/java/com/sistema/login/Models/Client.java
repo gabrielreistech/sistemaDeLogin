@@ -3,7 +3,6 @@ package com.sistema.login.Models;
 import com.sistema.login.Dtos.ClientDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
