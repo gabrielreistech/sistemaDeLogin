@@ -1,5 +1,6 @@
 # Ignorar application.properties
 src/main/resources/application.properties
+src/main/resources/
 
 # Outras configurações específicas para ferramentas e IDEs
 HELP.md
