@@ -1,11 +1,18 @@
 package com.sistema.login.Dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sistema.login.Models.Client;
 import com.sistema.login.Models.Phone;
+
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ClientMeDto {
+public class ClientMeDto implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String firstName;
 
@@ -97,5 +104,18 @@ public class ClientMeDto {
 
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    @Override
+    public String toString() {
+        return "ClientMeDto{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", phones=" + phones +
+                ", create=" + create +
+                ", lastLogin=" + lastLogin +
+                '}';
     }
 }

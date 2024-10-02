@@ -5,9 +5,14 @@ import com.sistema.login.Security.JwtUtil;
 import com.sistema.login.Services.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controlador privado responsável por fornecer informações detalhadas do cliente autenticado.
+ * As rotas expostas por este controlador requerem autenticação via JWT.
+ */
 @RestController
 @RequestMapping("/private")
 public class PrivateController {
@@ -16,21 +21,37 @@ public class PrivateController {
 
     private final JwtUtil jwtUtil;
 
+    /**
+     * Construtor do {@link PrivateController}.
+     *
+     * @param jwtUtil       Utilitário para manipulação de JWT.
+     * @param clientService Serviço responsável pelas operações de cliente.
+     */
     @Autowired
     public PrivateController(JwtUtil jwtUtil, ClientService clientService) {
         this.jwtUtil = jwtUtil;
         this.clientService = clientService;
     }
 
-
+    /**
+     * Endpoint para obter detalhes do cliente autenticado.
+     * Requer um token JWT válido no cabeçalho da requisição para autenticação.
+     *
+     * @param request {@link HttpServletRequest} contendo informações da requisição HTTP, incluindo o token JWT.
+     * @return {@link ResponseEntity} contendo um {@link ClientMeDto} com os detalhes do cliente autenticado.
+     */
     @GetMapping("/me")
-    public ResponseEntity<ClientMeDto> getUserDetails(HttpServletRequest request) {
-
-        String username = this.clientService.getUserDetailsService(request);
-
-        ClientMeDto user = clientService.findByEmail(username);
-
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> getUserDetails(HttpServletRequest request) {
+        String username;
+        try {
+            username = this.clientService.getUserDetailsService(request);
+            ClientMeDto user = clientService.findByEmail(username);
+            return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not Found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
-    }
+}
 

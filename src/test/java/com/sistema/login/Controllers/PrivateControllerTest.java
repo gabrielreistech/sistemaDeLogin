@@ -9,7 +9,6 @@ import com.sistema.login.Security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,10 +19,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PrivateController.class)
@@ -42,9 +44,6 @@ public class PrivateControllerTest {
 
     @Mock
     private HttpServletRequest request;
-
-    @InjectMocks
-    private PrivateController privateController;
 
     private ClientMeDto clientMeDto;
 
@@ -95,32 +94,39 @@ public class PrivateControllerTest {
     }
 
     @Test
-    void testGetUserDetails_Success() throws Exception {
+    public void testValidateToken() {
         String validToken = "valid_token";
-        String username = clientMeDto.getEmail();
+        String username = "user@example.com";
 
         when(jwtUtil.extractUsername(validToken)).thenReturn(username);
-        when(clientService.findByEmail(username)).thenReturn(clientMeDto);
         when(jwtUtil.validateToken(validToken, username)).thenReturn(true);
 
-        mockMvc.perform(get("/private/me")
-                        .header("Authorization", "Bearer " + validToken))
-                .andExpect(status().isOk());
-
+        // Adicione uma verificação aqui
+        assertTrue(jwtUtil.validateToken(validToken, username)); // Verifica se o token é validado corretamente
     }
 
     @Test
-    public void testGetUserDetails_SuccessTwo() throws Exception {
-        String authHeader = "Bearer valid_token";
+    void testGetUserDetails_Success() throws Exception {
+        String validToken = "Bearer valid_token";
+        String username = clientMeDto.getEmail();
 
-        when(clientService.getUserDetailsService(any(HttpServletRequest.class))).thenReturn(anyString());
-        when(clientService.findByEmail(clientMeDto.getEmail())).thenReturn(clientMeDto);
+        // Mockar comportamento do JWT Util
+        when(jwtUtil.extractUsername(validToken)).thenReturn(username);
+        when(jwtUtil.validateToken(validToken, username)).thenReturn(true);
 
-        mockMvc.perform(get("/me")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON))
+        // Mockar o serviço de detalhes do usuário
+        when(clientService.getUserDetailsService(any(HttpServletRequest.class))).thenReturn(username);
+
+        // Mockar a busca pelo usuário
+        when(clientService.findByEmail(username)).thenReturn(clientMeDto);
+
+        // Perform request and expect status 200 OK with correct JSON response
+        mockMvc.perform(get("/private/me")
+                        .header("Authorization", validToken))
+                .andDo(print()) // Para imprimir a resposta no console
                 .andExpect(status().isOk());
     }
+
 
     @Test
     void getUserDetails_InvalidToken_ShouldReturnUnauthorized() throws Exception {

@@ -170,7 +170,7 @@ class ClientServiceTest {
     void getUserDetailsService() {
          String authHeaderMock = "Bearer mock";
          String tokenMock = "mock";
-         String userNameMock = "userNameMock";
+         String userNameMock = "userNameMock@gmail.com";
 
          when(request.getHeader("Authorization")).thenReturn(authHeaderMock);
          when(jwtUtil.extractUsername(tokenMock)).thenReturn(userNameMock);

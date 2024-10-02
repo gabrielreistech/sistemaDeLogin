@@ -11,6 +11,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+/**
+ * Classe de configuração de segurança para a aplicação.
+ * Esta classe define as regras de segurança, incluindo o gerenciamento de autenticação e autorização de requisições HTTP.
+ */
 @Configuration
 @EnableWebSecurity
 public class SpringSecurity {
@@ -21,6 +25,13 @@ public class SpringSecurity {
     @Autowired
     private JwtFilter jwtFilter;
 
+    /**
+     * Define a cadeia de filtros de segurança para as requisições HTTP.
+     *
+     * @param http O objeto HttpSecurity que permite a configuração da segurança da aplicação.
+     * @return A cadeia de filtros de segurança configurada.
+     * @throws Exception Se ocorrer um erro durante a configuração da segurança.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -39,6 +50,11 @@ public class SpringSecurity {
         return http.build();
     }
 
+    /**
+     * Define um bean para o codificador de senhas.
+     *
+     * @return Um PasswordEncoder que utiliza o algoritmo BCrypt para codificação de senhas.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import static org.mockito.Mockito.*;
@@ -63,7 +65,7 @@ public class JwtFilterTest {
 
         when(request.getRequestURI()).thenReturn(pathRequestPublic);
 
-        if(pathRequestPublic.startsWith("/public/")){
+        if (pathRequestPublic.startsWith("/public/")) {
             doNothing().when(filterChain).doFilter(request, response);
         }
 
@@ -123,14 +125,25 @@ public class JwtFilterTest {
         UserDetails userDetails = mock(UserDetails.class);
         String jwtToken = "valid_token";
 
+        // Mock do UserDetails
+        when(userDetails.getUsername()).thenReturn(username);  // Configura o mock para retornar o username
+
+        // Simulação do comportamento
         when(request.getHeader("Authorization")).thenReturn(authHeader);
-        when(jwtUtil.extractUsername(jwtToken)).thenReturn(username);
+        when(jwtUtil.extractUsername(jwtToken)).thenReturn(username);  // Garante que username não seja null
         when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
         when(jwtUtil.validateToken(jwtToken, username)).thenReturn(true);
 
+        // Executa o método
         jwtFilter.doFilterInternal(request, response, filterChain);
 
+        // Verificações
         verify(filterChain, times(1)).doFilter(request, response);
         verify(response, never()).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        // Verificação adicional
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication(), "Authentication should not be null");
+        assertEquals(username, SecurityContextHolder.getContext().getAuthentication().getName(), "Username should match");
     }
+
 }
