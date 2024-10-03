@@ -47,7 +47,7 @@ class ValidationUserTest {
         phone = new Phone();
         phone.setId(1L);
         phone.setNumber(985958595L);
-        phone.setAreaCode((byte)81);
+        phone.setAreaCode(81);
         phone.setCountryCode("+55");
 
         List<Phone> phones = List.of(phone);

@@ -58,7 +58,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String pathRequest = request.getRequestURI();
 
         // Permite que rotas públicas passem sem verificação
-        if (pathRequest.startsWith("/public/")) {
+        if (pathRequest.startsWith("/public/") || pathRequest.startsWith("/h2-console")) {
             filterChain.doFilter(request, response);
             return;
         }

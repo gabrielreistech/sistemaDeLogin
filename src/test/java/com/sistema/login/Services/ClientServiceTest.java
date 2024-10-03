@@ -56,13 +56,13 @@ class ClientServiceTest {
         Phone phone = new Phone();
         phone.setId(1L);
         phone.setNumber(985958595L);
-        phone.setAreaCode((byte)81);
+        phone.setAreaCode(81);
         phone.setCountryCode("+55");
 
         Phone phone2 = new Phone();
         phone.setId(2L);
         phone.setNumber(995958595L);
-        phone.setAreaCode((byte)81);
+        phone.setAreaCode(81);
         phone.setCountryCode("+55");
 
         List<Phone> phones = Arrays.asList(phone, phone2);

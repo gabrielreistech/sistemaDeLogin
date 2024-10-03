@@ -37,8 +37,8 @@ public class SpringSecurity {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll() // Permitir acesso ao H2 Console
+                        .requestMatchers("/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers

@@ -1,9 +1,7 @@
 package com.sistema.login.Dtos;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sistema.login.Models.Client;
 import com.sistema.login.Models.Phone;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;

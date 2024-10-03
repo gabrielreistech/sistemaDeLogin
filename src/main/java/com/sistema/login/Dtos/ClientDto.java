@@ -19,7 +19,7 @@ public class ClientDto {
     private String lastName;
 
     @NotBlank(message = "Missing fields")
-    @Email(message = "Invalid email format")
+    @Email(message = "Invalid fields")
     private String email;
 
     @NotBlank(message = "Missing fields")

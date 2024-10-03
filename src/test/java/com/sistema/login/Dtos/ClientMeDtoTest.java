@@ -28,13 +28,13 @@ class ClientMeDtoTest {
         phone = new Phone();
         phone.setId(1L);
         phone.setNumber(99999999L);
-        phone.setAreaCode((byte) 81);
+        phone.setAreaCode(81);
         phone.setCountryCode("+55");
 
         phone2 = new Phone();
         phone2.setId(2L);
         phone2.setNumber(999999988L);
-        phone2.setAreaCode((byte) 81);
+        phone2.setAreaCode(81);
         phone2.setCountryCode("+55");
 
         phones = List.of(phone);

@@ -12,7 +12,7 @@ class ClientTest {
 
     @Test
     void createConstruct(){
-        Phone phone = new Phone(819999999L, (byte)81, "+55");
+        Phone phone = new Phone(819999999L, 81, "+55");
         phone.setId(1L);
         List<Phone> phones = List.of(phone);
 
@@ -21,7 +21,7 @@ class ClientTest {
         assertEquals("123456", client.getPassword());
         assertEquals(1L, phone.getId());
         assertEquals(819999999L, phone.getNumber());
-        assertEquals((byte) 81, phone.getAreaCode());
+        assertEquals(81, phone.getAreaCode());
         assertEquals("+55", phone.getCountryCode());
     }
 }

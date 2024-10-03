@@ -27,7 +27,7 @@ class UserDetailsServiceImplTest {
     @Test
     public void loadUserByUsername_ReturnsUserDetails_WhenUserExists() {
 
-        Phone phone = new Phone(819999999L, (byte)81, "+55");
+        Phone phone = new Phone(819999999L, 81, "+55");
         phone.setId(1L);
         List<Phone> phones = List.of(phone);
 

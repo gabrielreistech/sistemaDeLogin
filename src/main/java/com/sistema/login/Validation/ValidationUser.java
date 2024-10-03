@@ -62,17 +62,41 @@ public class ValidationUser {
      */
     public ClientDto validationData(ClientDto clientDto) {
         final Pattern CONTAINS_NUMBER = Pattern.compile(".*\\d.*");
+        final Pattern CONTAINS_LETTER = Pattern.compile(".*[a-zA-Z].*");
+        final Pattern COUNTRY_CODE_PATTERN = Pattern.compile("^\\+\\d+$");
 
         // Verifica se o primeiro nome contém números
-        if (CONTAINS_NUMBER.matcher(clientDto.getFirstName()).matches()) {
+        if (CONTAINS_NUMBER.matcher(clientDto.getFirstName()).find()) {
             throw new IllegalArgumentException("Invalid fields");
         }
 
         // Verifica se o último nome contém números
-        if (CONTAINS_NUMBER.matcher(clientDto.getLastName()).matches()) {
+        if (CONTAINS_NUMBER.matcher(clientDto.getLastName()).find()) {
             throw new IllegalArgumentException("Invalid fields");
         }
+
+        for(int i = 0; i < clientDto.getPhones().size(); i++){
+
+            long number = clientDto.getPhones().get(i).getNumber();
+            Integer area = clientDto.getPhones().get(i).getAreaCode();
+
+            String numberString = String.valueOf(number);
+            String areaString = String.valueOf(area);
+
+            if(CONTAINS_LETTER.matcher(numberString).find()){
+                throw new IllegalArgumentException("Invalid fields");
+            }
+
+            if(CONTAINS_LETTER.matcher(areaString).find()){
+                throw new IllegalArgumentException("Invalid fields");
+            }
+
+            if(!COUNTRY_CODE_PATTERN.matcher(clientDto.getPhones().get(i).getCountryCode()).find()){
+                throw new IllegalArgumentException("Invalid fields");
+            }
+        }
         return clientDto;
+
     }
 
     /**

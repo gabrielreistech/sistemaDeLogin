@@ -3,6 +3,7 @@ package com.sistema.login.Models;
 import com.sistema.login.Dtos.ClientDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -28,6 +29,7 @@ public class Client implements Serializable {
 
     private String password;
 
+    @Valid
     @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Phone> phones;
 

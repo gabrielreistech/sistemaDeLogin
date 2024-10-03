@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
+
 /**
  * Controlador privado responsável por fornecer informações detalhadas do cliente autenticado.
  * As rotas expostas por este controlador requerem autenticação via JWT.
@@ -42,15 +44,16 @@ public class PrivateController {
      */
     @GetMapping("/me")
     public ResponseEntity<?> getUserDetails(HttpServletRequest request) {
-        String username;
         try {
-            username = this.clientService.getUserDetailsService(request);
+            String username = this.clientService.getUserDetailsService(request);
             ClientMeDto user = clientService.findByEmail(username);
             return ResponseEntity.ok(user);
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not Found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

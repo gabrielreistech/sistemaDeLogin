@@ -53,7 +53,7 @@ class PublicControllerTest {
         phone = new Phone();
         phone.setId(1L);
         phone.setNumber(99999999L);
-        phone.setAreaCode((byte) 81);
+        phone.setAreaCode(81);
         phone.setCountryCode("+55");
 
         phones = List.of(phone);

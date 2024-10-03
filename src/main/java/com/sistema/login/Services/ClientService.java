@@ -3,6 +3,7 @@ package com.sistema.login.Services;
 import com.sistema.login.Dtos.ClientDto;
 import com.sistema.login.Dtos.ClientLoginDto;
 import com.sistema.login.Dtos.ClientMeDto;
+import com.sistema.login.Exception.ExpiredJwtException;
 import com.sistema.login.Models.Client;
 import com.sistema.login.Repositorys.ClientRepository;
 import com.sistema.login.Security.JwtUtil;
@@ -127,24 +128,27 @@ public class ClientService {
         // Extrai o cabeçalho de autorização da requisição
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Unauthorized");
+            throw new IllegalArgumentException("Unauthorized"); // Lançar uma exceção se não houver token
         }
 
         // Extrai o token JWT do cabeçalho
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7); // Remove "Bearer "
         String username;
+
         try {
             // Extrai o nome de usuário (e-mail) do token JWT
             username = jwtUtil.extractUsername(token);
-
-            if(username == null){
+            if (username == null) {
                 throw new IllegalArgumentException("Unauthorized");
             }
-
+        } catch (ExpiredJwtException e) {
+            // Captura a exceção específica de token expirado
+            throw new IllegalArgumentException("Unauthorized - invalid session");
         } catch (Exception e) {
-            System.out.println("Erro ao extrair o nome de usuário: " + e.getMessage());
+            // Captura qualquer outra exceção
             throw new IllegalArgumentException("Unauthorized");
         }
-        return username;
+
+        return username; // Retorna o nome de usuário extraído
     }
 }

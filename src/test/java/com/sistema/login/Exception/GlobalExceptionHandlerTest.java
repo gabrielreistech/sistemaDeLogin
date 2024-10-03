@@ -59,7 +59,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<StandardError> response = handler.handleValidationExceptions(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Missing fields", response.getBody().getMessage());
+        assertEquals("Invalid fields", response.getBody().getMessage());
         assertEquals("Validation error", response.getBody().getError());
     }
 
