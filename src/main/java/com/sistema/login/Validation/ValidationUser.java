@@ -53,12 +53,20 @@ public class ValidationUser {
     }
 
     /**
-     * Valida os dados fornecidos no DTO do cliente para garantir que
-     * não contenham números nos campos de nome.
+     * Valida os campos de um objeto {@link ClientDto} para garantir que atendam a critérios específicos.
      *
-     * @param clientDto DTO contendo as informações do cliente a serem validadas.
-     * @return O mesmo {@link ClientDto} caso a validação seja bem-sucedida.
-     * @throws IllegalArgumentException Se algum dos campos de nome contiver números.
+     * Este método verifica que:
+     * - O primeiro nome e o último nome não contêm números.
+     * - Os números de telefone não contêm letras.
+     * - Os códigos de área não contêm letras.
+     * - O código do país está no formato "+<dígitos>".
+     *
+     * Se alguma dessas condições for violada, uma {@link IllegalArgumentException} é lançada
+     * com a mensagem "Invalid fields".
+     *
+     * @param clientDto o objeto {@link ClientDto} a ser validado
+     * @return o objeto {@link ClientDto} validado
+     * @throws IllegalArgumentException se algum critério de validação não for atendido
      */
     public ClientDto validationData(ClientDto clientDto) {
         final Pattern CONTAINS_NUMBER = Pattern.compile(".*\\d.*");
@@ -96,7 +104,6 @@ public class ValidationUser {
             }
         }
         return clientDto;
-
     }
 
     /**
